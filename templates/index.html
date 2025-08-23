@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Medicine Comparison</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f8f9fa; }
+        form { margin-bottom: 30px; }
+        input { padding: 10px; margin: 5px; }
+        button { padding: 10px 20px; cursor: pointer; }
+
+        .result { margin-top: 30px; }
+
+        /* Arc Progress Bar */
+        .progress-container {
+            width: 200px;
+            height: 100px;
+            background: #eee;
+            border-radius: 100px 100px 0 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-fill {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: conic-gradient(#4caf50 var(--angle, 0deg), #eee 0deg);
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+            transform: translateY(50%);
+        }
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            bottom: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        ul { margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<h2>Medicine Comparison</h2>
+<form method="POST">
+    <input type="text" name="med1" placeholder="Prescribed Medicine" required>
+    <input type="text" name="med2" placeholder="Available Medicine" required>
+    <button type="submit">Compare</button>
+</form>
+
+{% if data and not data.error %}
+<div class="result">
+    <h3>Confidence Score</h3>
+    <div class="progress-container">
+        <div class="progress-fill" style="--angle: {{ (data.confidence/100)*180 }}deg;"></div>
+        <div class="progress-text">{{ data.confidence }}%</div>
+    </div>
+
+    <h3>Side Effects</h3>
+    <ul>
+        {% for se in data.side_effects %}
+            <li>{{ se }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Symptoms Treated</h3>
+    <ul>
+        {% for sym in data.symptoms_treated %}
+            <li>{{ sym }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Verdict</h3>
+    <p><strong>{{ data.verdict }}</strong></p>
+</div>
+{% elif data and data.error %}
+<p style="color:red;">Error: {{ data.error }}</p>
+{% endif %}
+
+</body>
+</html>
