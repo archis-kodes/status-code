@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Comparison</title>
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #e3f2fd 0%, #f8fbff 100%);
+    min-height: 100vh;
+    color: #1a1a1a;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #0d47a1;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #0d47a1, #1976d2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header p {
+    font-size: 1.1rem;
+    color: #546e7a;
+}
+
+.medicine-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(13, 71, 161, 0.1);
+    border: 1px solid rgba(25, 118, 210, 0.1);
+    margin-bottom: 2rem;
+}
+
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .input-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.input-container input {
+    flex: 1;
+    padding: 1rem;
+    border: 2px solid #e3f2fd;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #fafafa;
+}
+
+.input-container input:focus {
+    outline: none;
+    border-color: #1976d2;
+    background: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
+}
+
+.camera-btn {
+    background: linear-gradient(135deg, #1976d2, #42a5f5);
+    border: none;
+    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+}
+
+.camera-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
+}
+
+.compare-btn {
+    width: 100%;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #1976d2, #42a5f5);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.compare-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
+}
+
+.compare-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.result-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(13, 71, 161, 0.1);
+    border: 1px solid rgba(25, 118, 210, 0.1);
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.confidence-section {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e3f2fd;
+}
+
+.confidence-arc-container {
+    margin: 1.5rem 0;
+}
+
+.confidence-arc {
+    position: relative;
+    width: 200px;
+    height: 100px;
+    margin: 0 auto;
+}
+
+.arc-fill {
+    width: 200px;
+    height: 100px;
+    border-radius: 100px 100px 0 0;
+    border: 8px solid #e3f2fd;
+    border-bottom: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.arc-fill::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 100px 100px 0 0;
+    border: 8px solid transparent;
+    border-bottom: none;
+    transform-origin: 50% 100%;
+    transition: transform 1s ease-in-out;
+}
+
+.confidence-text {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0d47a1;
+}
+
+.section {
+    margin-bottom: 2rem;
+}
+
+.section h3 {
+    color: #0d47a1;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.styled-list {
+    list-style: none;
+    padding: 0;
+}
+
+.styled-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    background: #f8fbff;
+    border-radius: 8px;
+    border-left: 4px solid #1976d2;
+}
+
+.styled-list li::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, #1976d2, #42a5f5);
+    border-radius: 50%;
+    margin-top: 0.5rem;
+    flex-shrink: 0;
+}
+
+.verdict-section {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e3f2fd;
+}
+
+.verdict-section h3 {
+    color: #0d47a1;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.verdict-card {
+    background: linear-gradient(135deg, #e3f2fd, #f8fbff);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(25, 118, 210, 0.2);
+}
+
+.verdict-card p {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0d47a1;
+    margin: 0;
+}
+
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid #1976d2;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    max-width: 300px;
+}
+
+.toast.show {
+    transform: translateX(0);
+}
+
+.toast.error {
+    border-left-color: #f44336;
+}
+
+/* Confidence arc colors based on percentage */
+.confidence-arc[data-confidence] .arc-fill::before {
+    border-top-color: #f44336; /* Default red */
+}
+
+.confidence-arc[data-confidence^="5"] .arc-fill::before,
+.confidence-arc[data-confidence^="6"] .arc-fill::before,
+.confidence-arc[data-confidence^="7"] .arc-fill::before {
+    border-top-color: #ff9800; /* Yellow for 50-74% */
+}
+
+.confidence-arc[data-confidence^="8"] .arc-fill::before,
+.confidence-arc[data-confidence^="9"] .arc-fill::before,
+.confidence-arc[data-confidence="100"] .arc-fill::before {
+    border-top-color: #4caf50; /* Green for 75-100% */
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Medicine Comparison</h1>
+            <p>Compare medicines safely with AI-powered analysis</p>
+        </div>
+
+        <form method="POST" class="medicine-form">
+            <div class="input-row">
+                <div class="input-container">
+                    <input type="text" name="med1" placeholder="Prescribed Medicine" required>
+                    <button type="button" class="camera-btn" onclick="handleCameraClick('med1')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                    </button>
+                </div>
+                <div class="input-container">
+                    <input type="text" name="med2" placeholder="Available Medicine" required>
+                    <button type="button" class="camera-btn" onclick="handleCameraClick('med2')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <button type="submit" class="compare-btn" id="compareBtn">
+                <span class="btn-text">Compare Medicines</span>
+                <div class="loading-spinner" style="display: none;">
+                    <div class="spinner"></div>
+                    <span>Analyzing...</span>
+                </div>
+            </button>
+        </form>
+
+        {% if data and not data.error %}
+        <div class="result-card">
+            <div class="confidence-section">
+                <h3>Confidence Score</h3>
+                <div class="confidence-arc-container">
+                    <div class="confidence-arc" data-confidence="{{ data.confidence }}">
+                        <div class="arc-fill"></div>
+                        <div class="confidence-text">{{ data.confidence }}%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Side Effects</h3>
+                <ul class="styled-list">
+                    {% for se in data.side_effects %}
+                        <li>{{ se }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="section">
+                <h3>Symptoms Treated</h3>
+                <ul class="styled-list">
+                    {% for sym in data.symptoms_treated %}
+                        <li>{{ sym }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="verdict-section">
+                <h3>Verdict</h3>
+                <div class="verdict-card">
+                    <p>{{ data.verdict }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="toast" class="toast"></div>
+    <script>
+        // Handle form submission with loading state
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.medicine-form');
+    const compareBtn = document.getElementById('compareBtn');
+    const btnText = compareBtn.querySelector('.btn-text');
+    const loadingSpinner = compareBtn.querySelector('.loading-spinner');
+
+    // Initialize confidence arc animation
+    initConfidenceArc();
+
+    form.addEventListener('submit', function(e) {
+        // Show loading state
+        btnText.style.display = 'none';
+        loadingSpinner.style.display = 'flex';
+        compareBtn.disabled = true;
+    });
+});
+
+// Handle camera button clicks
+function handleCameraClick(fieldName) {
+    showToast(`Camera functionality for ${fieldName} will be implemented with your backend.`, 'info');
+}
+
+// Initialize confidence arc animation
+function initConfidenceArc() {
+    const confidenceArc = document.querySelector('.confidence-arc');
+    if (!confidenceArc) return;
+
+    const confidence = parseInt(confidenceArc.dataset.confidence);
+    const arcFill = confidenceArc.querySelector('.arc-fill::before');
+    
+    // Calculate rotation angle (0-180 degrees for half circle)
+    const angle = (confidence / 100) * 180;
+    
+    // Apply the rotation with a delay for animation effect
+    setTimeout(() => {
+        const arcElement = confidenceArc.querySelector('.arc-fill');
+        arcElement.style.setProperty('--rotation', `${angle}deg`);
+        
+        // Update CSS custom property for the arc fill
+        const style = document.createElement('style');
+        style.textContent = `
+            .confidence-arc[data-confidence="${confidence}"] .arc-fill::before {
+                transform: rotate(${angle}deg);
+            }
+        `;
+        document.head.appendChild(style);
+    }, 500);
+
+    // Set appropriate color based on confidence level
+    updateArcColor(confidence, confidenceArc);
+}
+
+// Update arc color based on confidence percentage
+function updateArcColor(confidence, arcElement) {
+    let color;
+    if (confidence < 50) {
+        color = '#f44336'; // Red
+    } else if (confidence < 75) {
+        color = '#ff9800'; // Yellow/Orange
+    } else {
+        color = '#4caf50'; // Green
+    }
+
+    // Apply the color dynamically
+    const style = document.createElement('style');
+    style.textContent = `
+        .confidence-arc[data-confidence="${confidence}"] .arc-fill::before {
+            border-top-color: ${color} !important;
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Toast notification system
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast ${type}`;
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+// Enhanced form validation
+function validateForm() {
+    const med1 = document.querySelector('input[name="med1"]').value.trim();
+    const med2 = document.querySelector('input[name="med2"]').value.trim();
+
+    if (!med1 || !med2) {
+        showToast('Please enter both medicine names.', 'error');
+        return false;
+    }
+
+    return true;
+}
+
+// Add input validation on form submit
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.medicine-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+});
+
+// Smooth animations for input focus
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.input-container input');
+    
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+});
+    </script>
+</body>
+</html>
